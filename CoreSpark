@@ -1,0 +1,198 @@
+SPARK BASICS
+========================================================================================================================
+
+spark-shell –master yarn –conf spark.ui.port=five_digit_number
+
+Spark word count prpgram
+-------------------------
+
+This book has been so helpful to so many people because it simply helps us to correctly interpret
+the situation. After reading a few pages you will begin to laugh at your own mistakes. With this
+lighthearted reaction it becomes easier to relax and not take yourself or your partner’s mistakes so
+seriously. When we can lighten up it becomes easy to remember all the good times and the qualities
+and characteristics of someone rather than focusing on the negative. It is also a comfort to know that
+your issues are similar to others. So many people report that it seems I have been following them
+around and listening in on their conversations
+
+hadoop fs -put /home/selfcoursebigdata2042/girish/Scala /user/selfcoursebigdata2042/girish
+hadoop fs -ls /user/selfcoursebigdata2042/girish
+
+val inputpath = "/user/selfcoursebigdata2042/girish/Scala/wordcount.txt"
+val outputpath = "/user/selfcoursebigdata2042/girish/Scala/Output/wordcount"
+
+sc.textFile(inputpath).
+  flatMap(line => line.split(" ").map(rec => (rec, 1))).
+  reduceByKey(_ + _).
+  take(100).
+  foreach(println)
+
+//Saving to file
+sc.textFile(inputpath).
+  flatMap(_.split(" ")).
+  map((_, 1)).
+  reduceByKey(_ + _).
+  map(rec => rec._1 + "\t" + rec._2).
+  saveAsTextFile(outputpath)
+
+
+import sys.process._
+
+scala> "ls /user/selfcoursebigdata2042/girish/Scala/Output/wordcount/part*".!
+
+=============================================================================================================================================
+
+Transformations and Actions
+----------------------------
+
+a) Preview data first, take and collect
+
+take - it takes one integer n as parameter and returns first n records from rdd without ordering from all the partitions based on "n" 
+value. Data type will be array.
+first – returns first record from rdd. Data type will be inferred from the element
+top - returns then elements of RDD based on default ordering(DESC) or based on custom ordering provided by user.Returns the top k 
+(largest) elements from this RDD as defined by the specified implicit Ordering[T] and maintains the ordering. 
+collect – it converts the RDD to an Array. If the RDD is big, then using collect might take very long time and also might run into out 
+of memory issues
+
+We typically use these APIs as part of spark-shell to preview or validate the data
+Never use any of these APIs as part of applications that will be deployed in production, unless and until it is inevitable
+On top of take and collect, foreach is used to display the results in readable as well as custom format
+
+val path = "/public/retail_db" or val path = "/user/selfcoursebigdata2042/girish/Sqoop/retail_data"
+
+val rdd = sc.textFile(path + "/orders")
+rdd.first
+rdd.take(10)
+rdd.collect
+rdd.take(10).foreach(println)
+rdd.take(10).foreach(k => println(k.split(",")(0) + "\t" + k.split(",")(1)))
+
+
+Note:
+RDD : It is spark related datastructure and the data is distributed across the various nodes in the cluster.
+RDD.collect : it is a scala related datastructure. It converts all the records in RDD to a single collection of array. Whenever we apply
+collect action on RDD regardless the number of records in the RDD it will be converted to a single threaded collection of array which 
+miight cause the memory issue. So, we can't use abovementioned actions on any datasets on production.
+
+b) Processing Data - reduce, top, takeOrdered - Will take the data and convert to Array.
+
+We can apply global transformations using APIs such as reduce, top, takeOrdered
+number of invocations = number of elements on RDD
+count can be used to get number of elements
+takeSample can be used to get sample of data
+We can aggregate data using reduce – eg: total, min, max etc
+reduce - It will process the whole data set and returns one value based up on the functionality defined. It takes 2 parameters 
+(eg: total and element).
+We can get top n records, using top and takeOrdered
+top - It takes n as parameter. It will sort the data in natural descending order and returns top n records
+takeOrdered - It can be used to sort the data in natural order by applying simple transformations
+To use takeOrdered, either element type with in RDD need to have implicit ordering defined or function used in 2nd parameter should use 
+implicit ordering such as Ordering[Int]
+On top of top and takeOrdered, foreach is used to display the results in readable as well as custom format
+
+val path = "/public/retail_db" or val path = "/Users/itversity/Research/data/retail_db"
+val rdd = sc.textFile(path + "/orders")
+rdd.reduce((agg, ele) => {
+  if(agg.split(",")(2).toInt < ele.split(",")(2).toInt) agg else ele
+  })
+rdd.top(2)
+rdd.takeOrdered(5)(Ordering[Int].reverse.on(x => x.split(",")(2).toInt)).foreach(println)
+
+or
+
+val path = "/public/retail_db" or val path = "/Users/itversity/Research/data/retail_db"
+val rdd = sc.textFile(path + "/orders")
+val a = rdd.take(10)
+
+val agg = a(0)
+
+for(ele <- a)  {
+  if(agg.split(",")(2).toInt < ele.split(",")(2).toInt) agg else ele
+  })
+rdd.top(2)
+rdd.takeOrdered(5)(Ordering[Int].reverse.on(x => x.split(",")(2).toInt)).foreach(println)
+
+Note:
+Reduce:
+for loop code need to be replaced by reduce code
+takeOdered: It takes 2 arguments as parameters 
+takeOrdered(Int of num of records)(logic to be implemented on the records)
+In takeOrdered Ordering[Int].reverse.on will take entire string as a input record.
+By default. it sorts the data in ASC and if we give reverse.on on Ordering it will give the output in DESC order.
+It only work if RDD contains the elements of type values such int,string,float, double. if we have a custom type defined and unless we 
+define the implicit ordering is defined the takeOrdered might not work.
+
+c) Spark - Row level transformations - 
+ i)filter
+ ii) map and flatMap
+
+Let us explore how we can perform row level transformations. First let us check typical scenarios for row level transformations.
+
+Data cleansing – removing special characters
+Standardization – eg: phone number, we might want to get phone numbers from different sources and it might be represented different 
+manner in different systems. When we get onto down stream systems we have to represent phone number in one standard format.
+Discarding or filtering out unnecessary data
+Unpivoting the data, one row with many columns might have to return a collection of rows
+Let us map these scenarios with APIs categorized under transformations
+
+Data cleansing and standardization – map. It takes one record as input and returns exactly one record as output and for vertical filtering,
+we use map function
+Discarding or filtering – filter. It take one record as input, and if expression returns false record will be discarded 
+Unpivoting – flatMap. For each input record there will be 1 to n output records
+Number of invocations = Number of elements in RDD
+First we need to create RDD from files or collection and then apply transformations. To create RDD from files if you are using local 
+installation on your PC use local path and for lab or virtual machines of Cloudera or Hortonworks or MapR use HDFS path.
+
+For this you can launch Spark in local or stand alone mode on your PC, and on lab or virtual machines you can launch Spark in YARN or 
+local mode.
+
+i)filter
+
+val orders = sc.textFile("/user/selfcoursebigdata2042/girish/Sqoop/retail_data/orders")
+orders.take(10).foreach(println)
+val holdOrders = orders.filter((order: String) => order.split(",")(3) == "ON HOLD")
+holdOrders.take(10)
+val pendingOrders = orders.filter(rec => rec.split(",")(3).contains("PENDING") || rec.split(",")(3).contains("PROCESSING") && 
+rec.split(",")(1).contains("2013-08"))
+pendingOrders.take(10)
+
+ii) map and flatMap
+
+a)map
+val orderDates = orders.map(rec => (rec.split(",")(0).toInt,rec.split(",")(1))
+orderDates.take(10)
+
+b) flatMap
+
+val textData = Array("Hello World", 
+  "In this case we are trying to understand", 
+  "the purpose of flatMap", 
+  "flatMap is a function which will apply transformation", 
+  "if the transformation results in array, it will flatten out array as individual records", 
+  "let us also understand difference between map and flatMap", 
+  "in case of map, it take one record and return one record after applying transformation", 
+  "even if the transformation result in an array", 
+  "where as in case of flatMap, it might return one or more records", 
+  "if the transformation of 1 record result an array of 1000 records, ", 
+  "then flatMap returns 1000 records")
+
+  THis is a Array of String
+
+  textData.size --> It is of size 11 as it contains 11 statements 
+  textData.map(lines => lines.split(" ")) --> Gives the output as array of array of type string. It is a map function of Scala and 
+  it is not using Spark map function.
+
+  To make use of Spark features we need to create an RDD as below by using parallize function.
+  val textRDD = sc.parallize(textData)
+
+ Now textRDD is a RDD of type string.If we apply the map function it creates the RDD of type arrays
+ textRDD.map(lines => lines.split(" ")) 
+ textRDD.map(lines => lines.split(" ")).count --> Gives output still as 11
+
+ To achive the output as individual records we just need to use the transformation flatMap in place of Map
+  val flatData = textRDD.flatMap(lines => lines.split(" "))
+  flatData.count --> Gives the output as 98 records 
+
+  and we can proview the data by using 
+
+  flatData.collect.foreach(println)
