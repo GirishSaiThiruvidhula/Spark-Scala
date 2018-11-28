@@ -209,3 +209,309 @@ scala> data.map(rec => rec.split(",")(1)).take(10)foreach(println)
 2013-07-25 00:00:00.0
 
 But there is no column defined.
+Now let's consider the Dataframne, as per it's definiton we will have a data along with it's schema defined.Lets take the example for 
+creating dataframe with json data.
+
+Before that there is an api in spark which tells what are the file formats that are supported by it:
+
+scala> spark.read.
+csv   format   jdbc   json   load   option   options   orc   parquet   schema   table   text   textFile
+
+We read the data from variuos file formats specifed above.
+
+scala> val orders = spark.read.json("/user/selfcoursebigdata2042/girish/Datasets/retail_db_json/orders")
+orders: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 2 more fields]
+
+scala> orders.printSchema
+root
+ |-- order_customer_id: long (nullable = true)
+ |-- order_date: string (nullable = true)
+ |-- order_id: long (nullable = true)
+ |-- order_status: string (nullable = true)
+
+ As per the data in json format, each value in the field is tied to it's name like
+
+ {"order_id":1,"order_date":"2013-07-25 00:00:00.0","order_customer_id":11599,"order_status":"CLOSED"}
+{"order_id":2,"order_date":"2013-07-25 00:00:00.0","order_customer_id":256,"order_status":"PENDING_PAYMENT"}
+{"order_id":3,"order_date":"2013-07-25 00:00:00.0","order_customer_id":12111,"order_status":"COMPLETE"}
+{"order_id":4,"order_date":"2013-07-25 00:00:00.0","order_customer_id":8827,"order_status":"CLOSED"}
+
+So there is a specified column name for each json field along with it's value which was sepecrated by ":".
+
+scala> orders.show
++-----------------+--------------------+--------+---------------+
+|order_customer_id|          order_date|order_id|   order_status|
++-----------------+--------------------+--------+---------------+
+|            11599|2013-07-25 00:00:...|       1|         CLOSED|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|
+|            12111|2013-07-25 00:00:...|       3|       COMPLETE|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|
+|             7130|2013-07-25 00:00:...|       6|       COMPLETE|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|
+|             5657|2013-07-25 00:00:...|       9|PENDING_PAYMENT|
+|             5648|2013-07-25 00:00:...|      10|PENDING_PAYMENT|
+|              918|2013-07-25 00:00:...|      11| PAYMENT_REVIEW|
+|             1837|2013-07-25 00:00:...|      12|         CLOSED|
+|             9149|2013-07-25 00:00:...|      13|PENDING_PAYMENT|
+|             9842|2013-07-25 00:00:...|      14|     PROCESSING|
+|             2568|2013-07-25 00:00:...|      15|       COMPLETE|
+|             7276|2013-07-25 00:00:...|      16|PENDING_PAYMENT|
+|             2667|2013-07-25 00:00:...|      17|       COMPLETE|
+|             1205|2013-07-25 00:00:...|      18|         CLOSED|
+|             9488|2013-07-25 00:00:...|      19|PENDING_PAYMENT|
+|             9198|2013-07-25 00:00:...|      20|     PROCESSING|
++-----------------+--------------------+--------+---------------+
+only showing top 20 rows
+
+
+But when we deal with other dat formats like csv the case will be 
+
+scala> val orders = spark.read.csv("/user/selfcoursebigdata2042/girish/Datasets/retail_db/orders")
+orders: org.apache.spark.sql.DataFrame = [_c0: string, _c1: string ... 2 more fields]
+
+scala> orders.printSchema
+root
+ |-- _c0: string (nullable = true)
+ |-- _c1: string (nullable = true)
+ |-- _c2: string (nullable = true)
+ |-- _c3: string (nullable = true)
+
+It creates the datafra,e with some orbitary column name, but we can use toDF to specify column names.
+
+scala> val orders = spark.read.csv("/user/selfcoursebigdata2042/girish/Datasets/retail_db/orders").toDF("order_customer_id","order_date",
+"order_id","order_status")
+orders: org.apache.spark.sql.DataFrame = [order_customer_id: string, order_date: string ... 2 more fields]
+
+scala> orders.printSchema
+root
+ |-- order_customer_id: string (nullable = true)
+ |-- order_date: string (nullable = true)
+ |-- order_id: string (nullable = true)
+ |-- order_status: string (nullable = true)
+
+Even though it changes the column name but it doesnot change the type.
+
+To change the type, there is an effective way 
+
+scala> val orders = sc.textFile("/user/selfcoursebigdata2042/girish/Datasets/retail_db/orders").
+     | map(rec => (rec.split(",")(0).toInt,rec.split(",")(1),rec.split(",")(2).toInt,rec.split(",")(3)))
+     .toDF("order_customer_id","order_date","order_id","order_status")
+orders: org.apache.spark.sql.DataFrame = [order_customer_id: int, order_date: string ... 2 more fields]
+
+scala> orders.printSchema
+root
+ |-- order_customer_id: integer (nullable = false)
+ |-- order_date: string (nullable = true)
+ |-- order_id: integer (nullable = false)
+ |-- order_status: string (nullable = true)
+
+
+DATASET
+=======
+
+We can create dataset using toDS like the way we created DF but there are some limitations.We cannot use the tuples like we have used 
+in map transformation.
+
+map(rec => (rec.split(",")(0).toInt,rec.split(",")(1),rec.split(",")(2).toInt,rec.split(",")(3)))
+
+We can create dataset either from RDD or D. We have to use Case Class
+
+Ex: case class Orders(order_id : Int,order_date : String,order_customer_id : Int,order_status : String )
+
+It gives something like Boiler plate code which means it gives certains functionality to the class and we can access all the variables 
+using 
+
+scala> :javap -p Orders
+Compiled from "<console>"
+public class Orders implements scala.Product,scala.Serializable {
+  private final int order_id;
+  private final java.lang.String order_date;
+  private final int order_customer_id;
+  private final java.lang.String order_status;
+  public final $iw $outer;
+  public int order_id();
+  public java.lang.String order_date();
+  public int order_customer_id();
+  public java.lang.String order_status();
+  public Orders copy(int, java.lang.String, int, java.lang.String);
+  public int copy$default$1();
+  public java.lang.String copy$default$2();
+  public int copy$default$3();
+  public java.lang.String copy$default$4();
+  public java.lang.String productPrefix();
+  public int productArity();
+  public java.lang.Object productElement(int);
+  public scala.collection.Iterator<java.lang.Object> productIterator();
+  public boolean canEqual(java.lang.Object);
+  public int hashCode();
+  public java.lang.String toString();
+  public boolean equals(java.lang.Object);
+  public $iw $line14$$read$Orders$$$outer();
+  public Orders($iw, int, java.lang.String, int, java.lang.String);
+}
+
+
+It contains the two interfaces namely Product and Serializable.
+
+Srerializable:
+The concept of serailizable is by default whenever we instatiate/create an object using a java class, the scope of the java object is 
+pertain to that JVM only with in the memory. It means  the object are flushed out of memory once the session expires which he program 
+exit.
+
+Using Seriablize we can pass the JVM to other node and make availabe for other class or we can save byte of an class. By default case 
+class is Serailizable.
+
+Product:
+We can use gthe functions like productPrefix,productElement.
+
+And by default all the variables in case class are immutalbe and they are just like final varaibles in java.
+
+CREATION OF DATASET FROM RDD:
+============================
+CODE:
+====
+case class Order(order_id : Int,order_date : String,order_customer_id : Int,order_status : String )
+val orders = sc.textFile("/user/selfcoursebigdata2042/girish/Datasets/retail_db/orders").
+map(o => {
+ val a = o.split(",")
+ Order(a(0).toInt,a(1),a(2).toInt,a(3))
+ }).toDS
+
+RESULT:
+======
+ scala> case class Order(order_id : Int,order_date : String,order_customer_id : Int,order_status : String )
+defined class Order
+
+scala> val orders = sc.textFile("/user/selfcoursebigdata2042/girish/Datasets/retail_db/orders").
+     | map(o => {
+     |  val a = o.split(",")
+     |  Order(a(0).toInt,a(1),a(2).toInt,a(3))
+     |  }).toDS
+orders: org.apache.spark.sql.Dataset[Order] = [order_id: int, order_date: string ... 2 more fields]
+
+CREATION OF DATASET FROM DATAFRAME:
+==================================
+case class Order(order_id : Long,order_date : String,order_customer_id : Long,order_status : String )
+val orderDF = spark.read.json("/user/selfcoursebigdata2042/girish/Datasets/retail_db_json/orders"").as[Order]
+
+scala> case class Order(order_id : Long,order_date : String,order_customer_id : Long,order_status : String )
+defined class Order
+
+scala> val orderDS = spark.read.json("/user/selfcoursebigdata2042/girish/Datasets/retail_db_json/orders").as[Order]
+orderDF: org.apache.spark.sql.Dataset[Order] = [order_customer_id: bigint, order_date: string ... 2 more fields]
+
+scala> orderDS.printSchema
+root
+ |-- order_customer_id: long (nullable = true)
+ |-- order_date: string (nullable = true)
+ |-- order_id: long (nullable = true)
+ |-- order_status: string (nullable = true)
+
+scala> orderDS.show
++-----------------+--------------------+--------+---------------+
+|order_customer_id|          order_date|order_id|   order_status|
++-----------------+--------------------+--------+---------------+
+|            11599|2013-07-25 00:00:...|       1|         CLOSED|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|
+|            12111|2013-07-25 00:00:...|       3|       COMPLETE|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|
+|             7130|2013-07-25 00:00:...|       6|       COMPLETE|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|
+|             5657|2013-07-25 00:00:...|       9|PENDING_PAYMENT|
+|             5648|2013-07-25 00:00:...|      10|PENDING_PAYMENT|
+|              918|2013-07-25 00:00:...|      11| PAYMENT_REVIEW|
+|             1837|2013-07-25 00:00:...|      12|         CLOSED|
+|             9149|2013-07-25 00:00:...|      13|PENDING_PAYMENT|
+|             9842|2013-07-25 00:00:...|      14|     PROCESSING|
+|             2568|2013-07-25 00:00:...|      15|       COMPLETE|
+|             7276|2013-07-25 00:00:...|      16|PENDING_PAYMENT|
+|             2667|2013-07-25 00:00:...|      17|       COMPLETE|
+|             1205|2013-07-25 00:00:...|      18|         CLOSED|
+|             9488|2013-07-25 00:00:...|      19|PENDING_PAYMENT|
+|             9198|2013-07-25 00:00:...|      20|     PROCESSING|
++-----------------+--------------------+--------+---------------+
+only showing top 20 rows
+
+
+HOW TO REGISTER PACKAGES WITH SPARK:
+===================================
+
+We have to launch the spark-shell using the following command and by giving the compatiable avro version incompaltiable with spark 
+version from the following link:
+
+https://github.com/databricks/spark-avro
+
+$ bin/spark-shell --packages com.databricks:spark-avro_2.11:4.0.0
+
+WRITE THE DATA USING SPARK:
+==========================
+
+val ordersJson = spark.read.json("/user/selfcoursebigdata2042/girish/Datasets/retail_db_json/orders")
+// Creates a DF whose name is ordersJson
+
+scala> val ordersJson = spark.read.json("/user/selfcoursebigdata2042/girish/Datasets/retail_db_json/orders")
+ordersJson: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 2 more fields]
+
+scala> ordersJson.printSchema
+root
+ |-- order_customer_id: long (nullable = true)
+ |-- order_date: string (nullable = true)
+ |-- order_id: long (nullable = true)
+ |-- order_status: string (nullable = true)
+
+
+scala> ordersJson.show(10)
++-----------------+--------------------+--------+---------------+
+|order_customer_id|          order_date|order_id|   order_status|
++-----------------+--------------------+--------+---------------+
+|            11599|2013-07-25 00:00:...|       1|         CLOSED|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|
+|            12111|2013-07-25 00:00:...|       3|       COMPLETE|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|
+|             7130|2013-07-25 00:00:...|       6|       COMPLETE|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|
+|             5657|2013-07-25 00:00:...|       9|PENDING_PAYMENT|
+|             5648|2013-07-25 00:00:...|      10|PENDING_PAYMENT|
++-----------------+--------------------+--------+---------------+
+only showing top 10 rows
+
+After registering the avro package, to use it we need to import the package
+
+scala> import com.databricks.spark.avro._
+import com.databricks.spark.avro._
+// Importing avro package to use it in our program
+
+scala> ordersJson.write.
+avro   bucketBy   csv   format   insertInto   jdbc   json   mode   option   options   orc   parquet   partitionBy   save   saveAsTable 
+sortBy   text
+
+scala> ordersJason.write.avro("/user/selfcoursebigdata2042/girish/Datasets/retail_db_avro/orders")
+// Wrting data using Dataframe API in Spark in avro file format
+
+// Reading the avro data from Spark Dataframe API
+
+scala> spark.read.avro("/user/selfcoursebigdata2042/girish/Datasets/retail_db_avro/orders")
+res3: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 2 more fields]
+
+scala> spark.read.avro("/user/selfcoursebigdata2042/girish/Datasets/retail_db_avro/orders").show(10)
++-----------------+--------------------+--------+---------------+
+|order_customer_id|          order_date|order_id|   order_status|
++-----------------+--------------------+--------+---------------+
+|            11599|2013-07-25 00:00:...|       1|         CLOSED|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|
+|            12111|2013-07-25 00:00:...|       3|       COMPLETE|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|
+|             7130|2013-07-25 00:00:...|       6|       COMPLETE|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|
+|             5657|2013-07-25 00:00:...|       9|PENDING_PAYMENT|
+|             5648|2013-07-25 00:00:...|      10|PENDING_PAYMENT|
++-----------------+--------------------+--------+---------------+
+only showing top 10 rows
