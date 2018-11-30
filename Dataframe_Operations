@@ -515,3 +515,20 @@ scala> spark.read.avro("/user/selfcoursebigdata2042/girish/Datasets/retail_db_av
 |             5648|2013-07-25 00:00:...|      10|PENDING_PAYMENT|
 +-----------------+--------------------+--------+---------------+
 only showing top 10 rows
+
+We can use the select statement using Dataframes to get results
+
+scala> ordersJson.select("order_id","order_date").show
+
+In order to apply any fuctions like lower(),upper() etc on any column we need to apply column type along with all the column in the 
+select statement.
+
+// col type and it's importance
+scala> ordersJson.select(col("order_id"),col(lower("order_status"))).show
+
+The shorthand notation of col is $
+
+scala> ordersJson.select($"order_id",lower($"order_status")).show
+
+// alias function 
+scala> ordersJson.select(col("order_id"),col(lower("order_status")).alias(Orders_Status)).show
