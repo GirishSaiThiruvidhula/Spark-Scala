@@ -1,0 +1,33 @@
+import xml.etree.ElementTree as ET
+
+xml_str=""
+with open("C:\\Users\\Girish Sai\\Desktop\\xmltest.xml","r") as file:
+    for line in file:
+        xml_str=line
+root=ET.fromstring(xml_str)
+
+def parse_xml(root):
+    d={}
+    for child in root:
+        if(len(child.getchildren())):
+            temp=parse_xml(child)
+            if(child.tag in d.keys()):
+                if(isinstance(d[child.tag],dict)):
+                    d[child.tag]=[d[child.tag],temp]
+                if(isinstance(d[child.tag],list)):
+                   d[child.tag].append(temp)
+            else:
+                d[child.tag]=temp
+        else:
+            if(child.tag in d.keys()):
+                if(isinstance(d[child.tag],str)):
+                    d[child.tag]=[d[child.tag],child.text]
+                if(isinstance(d[child.tag],list)):
+                    d[child.tag].append(child.text)
+            else:
+                d[child.tag]=child.text
+            d[child.tag]=child.text
+    return d
+
+dict=parse_xml(root)
+print(dict)
