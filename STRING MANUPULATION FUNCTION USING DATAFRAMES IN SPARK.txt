@@ -1,0 +1,441 @@
+STRING MAUPULATION FUNCTIONS:
+==============================
+
+//SUBSTRING,UPPER,LOWER,TRIM,LTRIM,RTRIM,LENGTH,SPLIT,INITCAP,REGEXP_REPLACE,TRANSLATE,LPAD,RPAD 
+
+scala> val orders = spark.read.json("D:\\Hadoop\\DATASETS\\data-master\\retail_db_json\\orders")
+orders: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 2 more fields]
+
+scala> orders.printSchema
+root
+ |-- order_customer_id: long (nullable = true)
+ |-- order_date: string (nullable = true)
+ |-- order_id: long (nullable = true)
+ |-- order_status: string (nullable = true)
+
+ 
+
+ scala> val order_items = spark.read.json("D:\\Hadoop\\DATASETS\\data-master\\retail_db_json\\order_items")
+order_items: org.apache.spark.sql.DataFrame = [order_item_id: bigint, order_item_order_id: bigint ... 4 more fields]
+
+scala> order_items.printSchema
+root
+ |-- order_item_id: long (nullable = true)
+ |-- order_item_order_id: long (nullable = true)
+ |-- order_item_product_id: long (nullable = true)
+ |-- order_item_product_price: double (nullable = true)
+ |-- order_item_quantity: long (nullable = true)
+ |-- order_item_subtotal: double (nullable = true)
+
+scala> val dual = Seq("A").toDF("dummy")
+dual: org.apache.spark.sql.DataFrame = [dummy: string]
+
+scala> dual.select(lpad
+   def lpad(str: org.apache.spark.sql.Column,len: Int,pad: String): org.apache.spark.sql.Column
+
+scala> dual.select(lpad(lit("7",3,"00"))).show
+<console>:26: error: not enough arguments for method lpad: (str: org.apache.spark.sql.Column, len: Int, pad: String)org.apache.spark.sql.Column.
+Unspecified value parameters len, pad.
+       dual.select(lpad(lit("7",3,"00"))).show
+                       ^
+
+scala> dual.select(lpad(lit("7"),3,"00")).show
++--------------+
+|lpad(7, 3, 00)|
++--------------+
+|           007|
++--------------+
+
+
+
+scala> val num = dual.select(lpad(lit("7"),3,"00")).show
++--------------+
+|lpad(7, 3, 00)|
++--------------+
+|           007|
++--------------+
+
+num: Unit = ()
+
+scala> dual.select(rpad(lit("7"),3,"00")).show
++--------------+
+|rpad(7, 3, 00)|
++--------------+
+|           700|
++--------------+
+
+
+scala> dual.select(regexp_
+regexp_extract   regexp_replace
+
+scala> dual.select(regexp_replace
+
+def regexp_replace(e: org.apache.spark.sql.Column,pattern: org.apache.spark.sql.Column,replacement: org.apache.spark.sql.Column): org.apache.spark.sql.Column
+def regexp_replace(e: org.apache.spark.sql.Column,pattern: String,replacement: String): org.apache.spark.sql.Column
+
+scala> dual.select(regexp_replace(lit("Manu loves Girish"),"loves","weds")).show
++----------------------------------------------+
+|regexp_replace(Manu loves Girish, loves, weds)|
++----------------------------------------------+
+|                              Manu weds Girish|
++----------------------------------------------+
+
+
+scala> dual.select(translate(lit("Manswini"),"ai","@!")).show
++---------------------------+
+|translate(Manswini, ai, @!)|
++---------------------------+
+|                   M@nsw!n!|
++---------------------------+
+
+
+scala> dual.select(translate(lit("Manaswini"),"ai","@!")).show
++----------------------------+
+|translate(Manaswini, ai, @!)|
++----------------------------+
+|                   M@n@sw!n!|
++----------------------------+
+
+
+scala> :History
+History: no such command.  Type :help for help.
+
+scala> :history
+ 97  val order_items = spark.read.json("D:\\Hadoop\\DATASETS\\data-master\\retail_db_json\\order_items")
+ 98  val dual = Seq("A").toDF("dummy")
+ 99  dual.select(lpad(lit("7",3,"00"))).show
+100  dual.select(lpad(lit("7"),3,"00")).show
+101  val Hunt = "James Bond" + dual.select(lpad(lit("7"),3,"00"))
+102  Hunt.show
+103  Hunt.foreach(println)
+104  val num = dual.select(lpad(lit("7"),3,"00")).show
+105  val name = "James Bond" + num
+106  name.println
+107  name.collect
+108  name.collect()
+109  clear
+110  clear;
+111  dual.select(rpad(lit("7"),3,"00")).show
+112  dual.select(regexp_replace(lit("Manu loves Girish"),"loves","weds")).show
+113  dual.select(translate(lit("Manswini"),"ai","@!")).show
+114  dual.select(translate(lit("Manaswini"),"ai","@!")).show
+115  :History
+116  :history
+
+scala> orders.
+agg          collect                         cube             filter             inputFiles        map                 rdd                  selectExpr             take              unionAll
+alias        collectAsList                   describe         first              intersect         mapPartitions       reduce               show                   takeAsList        unionByName
+apply        columns                         distinct         flatMap            isLocal           na                  registerTempTable    sort                   toDF              unpersist
+as           count                           drop             foreach            isStreaming       orderBy             repartition          sortWithinPartitions   toJSON            where
+cache        createGlobalTempView            dropDuplicates   foreachPartition   javaRDD           persist             repartitionByRange   sparkSession           toJavaRDD         withColumn
+checkpoint   createOrReplaceGlobalTempView   dtypes           groupBy            join              printSchema         rollup               sqlContext             toLocalIterator   withColumnRenamed
+coalesce     createOrReplaceTempView         except           groupByKey         joinWith          queryExecution      sample               stat                   toString          withWatermark
+col          createTempView                  explain          head               limit             randomSplit         schema               storageLevel           transform         write
+colRegex     crossJoin                       explode          hint               localCheckpoint   randomSplitAsList   select               summary                union             writeStream
+
+scala> orders.select(substring($"order_date",2,2)).show
++---------------------------+
+|substring(order_date, 2, 2)|
++---------------------------+
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
+|                         01|
++---------------------------+
+only showing top 20 rows
+
+
+scala> orders.select(lower($"order_status")).show
++-------------------+
+|lower(order_status)|
++-------------------+
+|             closed|
+|    pending_payment|
+|           complete|
+|             closed|
+|           complete|
+|           complete|
+|           complete|
+|         processing|
+|    pending_payment|
+|    pending_payment|
+|     payment_review|
+|             closed|
+|    pending_payment|
+|         processing|
+|           complete|
+|    pending_payment|
+|           complete|
+|             closed|
+|    pending_payment|
+|         processing|
++-------------------+
+only showing top 20 rows
+
+
+
+
+scala> orders.select(initcap($"order_status")).show
++---------------------+
+|initcap(order_status)|
++---------------------+
+|               Closed|
+|      Pending_payment|
+|             Complete|
+|               Closed|
+|             Complete|
+|             Complete|
+|             Complete|
+|           Processing|
+|      Pending_payment|
+|      Pending_payment|
+|       Payment_review|
+|               Closed|
+|      Pending_payment|
+|           Processing|
+|             Complete|
+|      Pending_payment|
+|             Complete|
+|               Closed|
+|      Pending_payment|
+|           Processing|
++---------------------+
+only showing top 20 rows
+
+
+scala> orders.select(split($"order_date"," ")).show
++--------------------+
+|split(order_date,  )|
++--------------------+
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
+|[2013-07-25, 00:0...|
++--------------------+
+only showing top 20 rows
+
+
+scala> orders.select(trim($"order_status")).show
++------------------+
+|trim(order_status)|
++------------------+
+|            CLOSED|
+|   PENDING_PAYMENT|
+|          COMPLETE|
+|            CLOSED|
+|          COMPLETE|
+|          COMPLETE|
+|          COMPLETE|
+|        PROCESSING|
+|   PENDING_PAYMENT|
+|   PENDING_PAYMENT|
+|    PAYMENT_REVIEW|
+|            CLOSED|
+|   PENDING_PAYMENT|
+|        PROCESSING|
+|          COMPLETE|
+|   PENDING_PAYMENT|
+|          COMPLETE|
+|            CLOSED|
+|   PENDING_PAYMENT|
+|        PROCESSING|
++------------------+
+only showing top 20 rows
+
+
+scala> dual.select(rtrim(lit("   Hello Friend  "))).show
++------------------------+
+|rtrim(   Hello Friend  )|
++------------------------+
+|            Hello Friend|
++------------------------+
+
+
+scala> dual.select(ltrim(lit("   Hello Friend  "))).show
++------------------------+
+|ltrim(   Hello Friend  )|
++------------------------+
+|          Hello Friend  |
++------------------------+
+
+
+scala> dual.select(trim(lit("   Hello Friend  "))).show
++-----------------------+
+|trim(   Hello Friend  )|
++-----------------------+
+|           Hello Friend|
++-----------------------+
+
+
+scala> dual.select(trim(lit("   Hello Friend  ").alias("TRIM"))).show
++---------------------------------+
+|trim(   Hello Friend   AS `TRIM`)|
++---------------------------------+
+|                     Hello Friend|
++---------------------------------+
+
+
+scala> dual.select(trim(lit("   Hello Friend  ")).alias("TRIM")).show
++------------+
+|        TRIM|
++------------+
+|Hello Friend|
++------------+
+
+
+scala> dual.select(ltrim(lit("   Hello Friend  ")).alias("LTRIM")).show
++--------------+
+|         LTRIM|
++--------------+
+|Hello Friend  |
++--------------+
+
+
+scala> dual.select(rtrim(lit("   Hello Friend  ")).alias("RTRIM")).show
++---------------+
+|          RTRIM|
++---------------+
+|   Hello Friend|
++---------------+
+
+
+scala> dual.select(lpad
+   def lpad(str: org.apache.spark.sql.Column,len: Int,pad: String): org.apache.spark.sql.Column
+
+scala> dual.select(lpad(lit("7"),3,"00")).show
++--------------+
+|lpad(7, 3, 00)|
++--------------+
+|           007|
++--------------+
+
+
+scala> dual.select(rpad(lit("7"),3,"00")).show
++--------------+
+|rpad(7, 3, 00)|
++--------------+
+|           700|
++--------------+
+
+
+scala> dual.select(pad(lit("7"),3,"00")).show
+<console>:26: error: not found: value pad
+       dual.select(pad(lit("7"),3,"00")).show
+                   ^
+
+scala> orders.select(length($"order_status")).show
++--------------------+
+|length(order_status)|
++--------------------+
+|                   6|
+|                  15|
+|                   8|
+|                   6|
+|                   8|
+|                   8|
+|                   8|
+|                  10|
+|                  15|
+|                  15|
+|                  14|
+|                   6|
+|                  15|
+|                  10|
+|                   8|
+|                  15|
+|                   8|
+|                   6|
+|                  15|
+|                  10|
++--------------------+
+only showing top 20 rows
+
+
+scala> orders.select(length($"order_status").alias("LENGTH")).show
++------+
+|LENGTH|
++------+
+|     6|
+|    15|
+|     8|
+|     6|
+|     8|
+|     8|
+|     8|
+|    10|
+|    15|
+|    15|
+|    14|
+|     6|
+|    15|
+|    10|
+|     8|
+|    15|
+|     8|
+|     6|
+|    15|
+|    10|
++------+
+only showing top 20 rows
+
+
+scala> dual.select(regex_replace(lit("My habits are my enimies"),"enimies","friends")).show
+<console>:26: error: not found: value regex_replace
+       dual.select(regex_replace(lit("My habits are my enimies"),"enimies","friends")).show
+                   ^
+
+scala> dual.select(regexp_replace(lit("My habits are my enimies"),"enimies","friends")).show
++----------------------------------------------------------+
+|regexp_replace(My habits are my enimies, enimies, friends)|
++----------------------------------------------------------+
+|                                      My habits are my ...|
++----------------------------------------------------------+
+
+
+scala> dual.select(regexp_replace(lit("My habits are my enimies"),"enimies","friends")).collect
+res32: Array[org.apache.spark.sql.Row] = Array([My habits are my friends])
+
+scala> dual.select(regexp_replace(lit("My habits are my enimies"),"enimies","friends")).collect.foreach(println)
+[My habits are my friends]
+
+scala> dual.select(regexp_replace(lit("My habits are my enimies").alias("REGEXP_STRING"),"enimies","friends")).collect.foreach(println)
+[My habits are my friends]
+
+scala> dual.select(regexp_replace(lit("My habits are my enimies").alias("REGEXP_STRING"),"enimies","friends")).show
++-----------------------------------------------------------------------------+
+|regexp_replace(My habits are my enimies AS `REGEXP_STRING`, enimies, friends)|
++-----------------------------------------------------------------------------+
+|                                                         My habits are my ...|
++-----------------------------------------------------------------------------+

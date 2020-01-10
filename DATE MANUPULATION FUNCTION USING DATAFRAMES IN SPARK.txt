@@ -1,0 +1,397 @@
+DATE MANUPULATION FUNCTIONS:
+===========================
+
+// SELECT CURRENT_DATE/CURRENT_TIMESTAMP, DATE_ADD,DATE_SUB,ADD_MONTHS,NEXT_DAY,DATE_DIFF,DAYOFYEAR,DAYOFMONTH,DAYOFWEEK,TRUNC,DATE_TRUNC,DATE_FORMAT,UNIX_TIMESTAMP,FROM_UNIXTIME
+
+
+scala> val dual = Seq("FILLER").toDF("DUMMY")
+2019-02-08 15:00:13 WARN  ObjectStore:568 - Failed to get database global_temp, returning NoSuchObjectException
+dual: org.apache.spark.sql.DataFrame = [DUMMY: string]
+
+scala> dual.select(current_date)
+res0: org.apache.spark.sql.DataFrame = [current_date(): date]
+
+scala> dual.select(current_date).show
++--------------+
+|current_date()|
++--------------+
+|    2019-02-08|
++--------------+
+
+
+scala> dual.select(current_timestamp).show
++--------------------+
+| current_timestamp()|
++--------------------+
+|2019-02-08 15:00:...|
++--------------------+
+
+
+scala> dual.select(date_add(current_date,3).show
+     |
+     | <script>:1: error: expected class or object definition
+dual.select(date_add(current_date,3).show
+^
+
+scala> dual.select(date_add(current_date,3)).show
++---------------------------+
+|date_add(current_date(), 3)|
++---------------------------+
+|                 2019-02-11|
++---------------------------+
+
+
+scala> dual.select(date_add(current_date,-3)).show
++----------------------------+
+|date_add(current_date(), -3)|
++----------------------------+
+|                  2019-02-05|
++----------------------------+
+
+
+scala> dual.select(date_sub(current_date,3)).show
++---------------------------+
+|date_sub(current_date(), 3)|
++---------------------------+
+|                 2019-02-05|
++---------------------------+
+
+
+scala> dual.select(add_months(current_date,3)).show
++-----------------------------+
+|add_months(current_date(), 3)|
++-----------------------------+
+|                   2019-05-08|
++-----------------------------+
+
+
+scala> dual.select(add_months(current_date,3).alias("ADD MONTHS")).show
++----------+
+|ADD MONTHS|
++----------+
+|2019-05-08|
++----------+
+
+
+scala> dual.select(next_day(current_date,"Friday")).show
++--------------------------------+
+|next_day(current_date(), Friday)|
++--------------------------------+
+|                      2019-02-15|
++--------------------------------+
+
+
+scala> dual.select(next_day(current_date,"Friday").alias("NEXTDATE OF GIVEN DAY")).show
++---------------------+
+|NEXTDATE OF GIVEN DAY|
++---------------------+
+|           2019-02-15|
++---------------------+
+
+
+scala> dual.select(day(current_date).alias("DAY EXTRACTION FROM DATEFIELD")).show
+<console>:26: error: not found: value day
+       dual.select(day(current_date).alias("DAY EXTRACTION FROM DATEFIELD")).show
+                   ^
+
+scala> dual.select(month(current_date).alias("MONTH EXTRACTION FROM DATEFIELD")).show
++-------------------------------+
+|MONTH EXTRACTION FROM DATEFIELD|
++-------------------------------+
+|                              2|
++-------------------------------+
+
+
+scala> dual.select(year(current_date).alias("YEAR EXTRACTION FROM DATEFIELD")).show
++------------------------------+
+|YEAR EXTRACTION FROM DATEFIELD|
++------------------------------+
+|                          2019|
++------------------------------+
+
+
+scala> dual.select(datediff
+   def datediff(end: org.apache.spark.sql.Column,start: org.apache.spark.sql.Column): org.apache.spark.sql.Column
+
+scala> dual.select(datediff(current_date,lit("2019-05-05")).alias("DATE DIFFERENCE")).show
++---------------+
+|DATE DIFFERENCE|
++---------------+
+|            -86|
++---------------+
+
+
+scala> dual.select(datediff(lit("2019-05-05"),current_date).alias("DATE DIFFERENCE")).show
++---------------+
+|DATE DIFFERENCE|
++---------------+
+|             86|
++---------------+
+
+
+scala> dual.select(dayofyear(current_date).alias("DAY IN 365 FORAMT-JULIAN DATE")).show
++-----------------------------+
+|DAY IN 365 FORAMT-JULIAN DATE|
++-----------------------------+
+|                           39|
++-----------------------------+
+
+
+scala> dual.select(dayofmonth(current_date).alias("DAY IN MONTH")).show
++------------+
+|DAY IN MONTH|
++------------+
+|           8|
++------------+
+
+
+scala> dual.select(dayofweek(current_date).alias("DAY IN A WEEK")).show
++-------------+
+|DAY IN A WEEK|
++-------------+
+|            6|
++-------------+
+
+
+scala> dual.select(trunc(current_date,"MM").alias("TRUNC")).show
++----------+
+|     TRUNC|
++----------+
+|2019-02-01|
++----------+
+
+
+scala> dual.select(trunc(current_date,"MM").alias("USED TO GENERATE MONTHLY REPORT FROM 1ST OF MONTH TO CURRENT DATE")).show
++-----------------------------------------------------------------+
+|USED TO GENERATE MONTHLY REPORT FROM 1ST OF MONTH TO CURRENT DATE|
++-----------------------------------------------------------------+
+|                                                       2019-02-01|
++-----------------------------------------------------------------+
+
+
+scala> dual.select(trunc(current_date,"YY").alias("USED TO GENERATE MONTHLY REPORT FROM 1ST OF YEAR TO CURRENT DATE")).show
++----------------------------------------------------------------+
+|USED TO GENERATE MONTHLY REPORT FROM 1ST OF YEAR TO CURRENT DATE|
++----------------------------------------------------------------+
+|                                                      2019-01-01|
++----------------------------------------------------------------+
+
+
+scala> dual.select(date_trunc("DD",current_timestamp).alias("USED TO GENERATE HOURLY REPORT FROM STARTING OF DAY TO CURRENT TIMESTAMP")).show
++------------------------------------------------------------------------+
+|USED TO GENERATE HOURLY REPORT FROM STARTING OF DAY TO CURRENT TIMESTAMP|
++------------------------------------------------------------------------+
+|                                                     2019-02-08 00:00:00|
++------------------------------------------------------------------------+
+
+
+scala> dual.select(current_date().alias("DATE IN YYYY-MM-DD")).show
++------------------+
+|DATE IN YYYY-MM-DD|
++------------------+
+|        2019-02-08|
++------------------+
+
+
+scala> dual.select(date_format
+   def date_format(dateExpr: org.apache.spark.sql.Column,format: String): org.apache.spark.sql.Column
+
+scala> dual.select(date_format(current_date,"YYMMDD")).show
++-----------------------------------+
+|date_format(current_date(), YYMMDD)|
++-----------------------------------+
+|                             190239|
++-----------------------------------+
+
+
+scala> dual.select(date_format(current_date,"YY-MM-DD").alias(DATE IN YY-MM-DD)).show
+<console>:26: error: not found: value DATE
+       dual.select(date_format(current_date,"YY-MM-DD").alias(DATE IN YY-MM-DD)).show
+                                                              ^
+<console>:26: error: not found: value YY
+       dual.select(date_format(current_date,"YY-MM-DD").alias(DATE IN YY-MM-DD)).show
+                                                                      ^
+<console>:26: error: not found: value MM
+       dual.select(date_format(current_date,"YY-MM-DD").alias(DATE IN YY-MM-DD)).show
+                                                                         ^
+<console>:26: error: not found: value DD
+       dual.select(date_format(current_date,"YY-MM-DD").alias(DATE IN YY-MM-DD)).show
+                                                                            ^
+
+scala> dual.select(date_format(current_date,"YY-MM-DD").alias("DATE IN YY-MM-DD")).show
++----------------+
+|DATE IN YY-MM-DD|
++----------------+
+|        19-02-39|
++----------------+
+
+
+scala> dual.select(date_format(current_date,"DD-MM-YY").alias("DATE IN DD-MM-YY")).show
++----------------+
+|DATE IN DD-MM-YY|
++----------------+
+|        39-02-19|
++----------------+
+
+
+scala> dual.select(date_format(current_date,"dd-MM-YY").alias("DATE IN dd-MM-YY")).show
++----------------+
+|DATE IN dd-MM-YY|
++----------------+
+|        08-02-19|
++----------------+
+
+
+scala> dual.select(date_format(current_date,"dd").alias("TO GET USING DATE_FORMAT")).show
++------------------------+
+|TO GET USING DATE_FORMAT|
++------------------------+
+|                      08|
++------------------------+
+
+
+scala> dual.select(date_format(current_date,"DD").alias("TO GET USING DATE_FORMAT IN JULIAN FORMAT")).show
++-----------------------------------------+
+|TO GET USING DATE_FORMAT IN JULIAN FORMAT|
++-----------------------------------------+
+|                                       39|
++-----------------------------------------+
+
+
+scala> dual.select(date_format(current_date,"dd").alias("TO GET DATE USING DATE_FORMAT")).show
++-----------------------------+
+|TO GET DATE USING DATE_FORMAT|
++-----------------------------+
+|                           08|
++-----------------------------+
+
+
+scala> dual.select(date_format(current_date,"DD").alias("TO GET DATE USING DATE_FORMAT IN JULIAN FORMAT")).show
++----------------------------------------------+
+|TO GET DATE USING DATE_FORMAT IN JULIAN FORMAT|
++----------------------------------------------+
+|                                            39|
++----------------------------------------------+
+
+
+scala> dual.select(date_format(current_date,"MM").alias("TO GET MONTH USING DATE_FORMAT IN JULIAN FORMAT")).show
++-----------------------------------------------+
+|TO GET MONTH USING DATE_FORMAT IN JULIAN FORMAT|
++-----------------------------------------------+
+|                                             02|
++-----------------------------------------------+
+
+
+scala> dual.select(date_format(current_date,"YYYY").alias("TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT")).show
++----------------------------------------------+
+|TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT|
++----------------------------------------------+
+|                                          2019|
++----------------------------------------------+
+
+
+scala> dual.select(date_format(current_date,"YY").alias("TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT")).show
++----------------------------------------------+
+|TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT|
++----------------------------------------------+
+|                                            19|
++----------------------------------------------+
+
+
+scala> dual.select(date_format(current_date,"yy").alias("TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT")).show
++----------------------------------------------+
+|TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT|
++----------------------------------------------+
+|                                            19|
++----------------------------------------------+
+
+
+scala> dual.select(unix_timestamp(current_date).alias("UNIA_TIMESTAMP")).show
++--------------+
+|UNIA_TIMESTAMP|
++--------------+
+|    1549564200|
++--------------+
+
+
+scala> dual.select(unix_timestamp(current_date).alias("UNIA_TIMESTAMP FOR CURRENT DATE")).show
++-------------------------------+
+|UNIA_TIMESTAMP FOR CURRENT DATE|
++-------------------------------+
+|                     1549564200|
++-------------------------------+
+
+
+scala> dual.select(unix_timestamp(current_timestamp).alias("UNIA_TIMESTAMP FOR CURRENT TIMESTAMP")).show
++------------------------------------+
+|UNIA_TIMESTAMP FOR CURRENT TIMESTAMP|
++------------------------------------+
+|                          1549620900|
++------------------------------------+
+
+
+scala> dual.select(from_unixtime(lit(1549620900)).alias("FROM UNIX_TIMESTAMP FOR CURRENT TIMESTAMP")).show
++-----------------------------------------+
+|FROM UNIX_TIMESTAMP FOR CURRENT TIMESTAMP|
++-----------------------------------------+
+|                      2019-02-08 15:45:00|
++-----------------------------------------+
+
+
+scala> dual.select(from_unixtime(lit(1549620900),"YYYYMMdd HH:mm:ss").alias("FROM UNIX_TIMESTAMP FOR CURRENT TIMESTAMP")).show
++-----------------------------------------+
+|FROM UNIX_TIMESTAMP FOR CURRENT TIMESTAMP|
++-----------------------------------------+
+|                        20190208 15:45:00|
++-----------------------------------------+
+
+
+ val dual = Seq("FILLER").toDF("DUMMY")
+ dual.select(current_date)
+ dual.select(current_date).show
+ dual.select(current_timestamp).show
+ dual.select(date_add(current_date,3).show
+ dual.select(date_add(current_date,3)).show
+ dual.select(date_add(current_date,-3)).show
+ dual.select(date_sub(current_date,3)).show
+ dual.select(add_months(current_date,3)).show
+ dual.select(add_months(current_date,3).alias("ADD MONTHS")).show
+ dual.select(next_day(current_date,"Friday")).show
+ dual.select(next_day(current_date,"Friday").alias("NEXTDATE OF GIVEN DAY")).show
+ dual.select(day(current_date).alias("DAY EXTRACTION FROM DATEFIELD")).show
+ dual.select(month(current_date).alias("MONTH EXTRACTION FROM DATEFIELD")).show
+ dual.select(year(current_date).alias("YEAR EXTRACTION FROM DATEFIELD")).show
+ dual.select(datediff(current_date,"2019-05-05").alias("DATE DIFFERENCE")).show
+ dual.select(datediff(current_date,2019-05-05).alias("DATE DIFFERENCE")).show
+ dual.select(datediff(current_date,lit("2019-05-05")).alias("DATE DIFFERENCE")).show
+ dual.select(datediff(lit("2019-05-05"),current_date).alias("DATE DIFFERENCE")).show
+ dual.select(dayofyear(current_date).alias("DAY IN 365 FORAMT-JULIAN DATE")).show
+ dual.select(dayofmonth(current_date).alias("DAY IN MONTH")).show
+ dual.select(dayofweek(current_date).alias("DAY IN A WEEK")).show
+ dual.select(trunc(current_date,"MM").alias("TRUNC")).show
+ dual.select(trunc(current_date,"MM").alias("USED TO GENERATE MONTHLY REPORT FROM 1ST OF MONTH TO CURRENT DATE")).show
+ dual.select(trunc(current_date,"YY").alias("USED TO GENERATE MONTHLY REPORT FROM 1ST OF YEAR TO CURRENT DATE")).show
+ dual.select(date_trunc("DD",current_timestamp).alias("USED TO GENERATE HOURLY REPORT FROM STARTING OF DAY TO CURRENT TIMESTAMP")).show
+ dual.select(current_date().alias("DATE IN YYYY-MM-DD")).show
+ dual.select(date_format(current_date,"YYMMDD")).show
+ dual.select(date_format(current_date,"YY-MM-DD").alias(DATE IN YY-MM-DD)).show
+ dual.select(date_format(current_date,"YY-MM-DD").alias("DATE IN YY-MM-DD")).show
+ dual.select(date_format(current_date,"DD-MM-YY").alias("DATE IN DD-MM-YY")).show
+ dual.select(date_format(current_date,"dd-MM-YY").alias("DATE IN dd-MM-YY")).show
+ dual.select(date_format(current_date,"dd").alias("TO GET USING DATE_FORMAT")).show
+ dual.select(date_format(current_date,"DD").alias("TO GET USING DATE_FORMAT IN JULIAN FORMAT")).show
+ dual.select(date_format(current_date,"dd").alias("TO GET DATE USING DATE_FORMAT")).show
+ dual.select(date_format(current_date,"DD").alias("TO GET DATE USING DATE_FORMAT IN JULIAN FORMAT")).show
+ dual.select(date_format(current_date,"MM").alias("TO GET MONTH USING DATE_FORMAT IN JULIAN FORMAT")).show
+ dual.select(date_format(current_date,"YYYY").alias("TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT")).show
+ dual.select(date_format(current_date,"YY").alias("TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT")).show
+ dual.select(date_format(current_date,"yy").alias("TO GET YEAR USING DATE_FORMAT IN JULIAN FORMAT")).show
+ dual.select(unix_timestamp(current_date).alias("UNIA_TIMESTAMP")).show
+ dual.select(unix_timestamp(current_date).alias("UNIA_TIMESTAMP FOR CURRENT DATE")).show
+ dual.select(unix_timestamp(current_timestamp).alias("UNIA_TIMESTAMP FOR CURRENT TIMESTAMP")).show
+ dual.select(from_unixtime(lit(1549620900)).alias("FROM UNIX_TIMESTAMP FOR CURRENT TIMESTAMP")).show
+ dual.select(from_unixtime(lit(1549620900),"YYYYMMdd HH:mm:ss").alias("FROM UNIX_TIMESTAMP FOR CURRENT TIMESTAMP")).show
+ dual.select(isnull(null)).alias("TO FIND COLUMN IS NULL OR NOT")).show
+ dual.select(isnull(lit(null)).alias("TO FIND COLUMN IS NULL OR NOT")).show
+ dual.select(isnull(lit(GIRISH)).alias("TO FIND COLUMN IS NULL OR NOT")).show
+ dual.select(isnull(lit(1)).alias("TO FIND COLUMN IS NULL OR NOT")).show

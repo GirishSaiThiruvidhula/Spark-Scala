@@ -1,0 +1,373 @@
+AGGREGATIONS:
+============
+
+a. Total AGGREGATIONS(count,sum)
+b. BY group AGGREGATIONS
+
+
+scala> val orders = spark.read.json("D:\\Hadoop\\DATASETS\\data-master\\retail_db_json\\orders")
+2019-02-11 20:11:31 WARN  ObjectStore:568 - Failed to get database global_temp, returning NoSuchObjectException
+orders: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 2 more fields]
+
+scala>
+
+scala> val order_items = spark.read.json("D:\\Hadoop\\DATASETS\\data-master\\retail_db_json\\order_items")
+order_items: org.apache.spark.sql.DataFrame = [order_item_id: bigint, order_item_order_id: bigint ... 4 more fields]
+
+scala> order_items.
+agg          collect                         cube             filter             inputFiles        map                 rdd                  selectExpr             take              unionAll
+alias        collectAsList                   describe         first              intersect         mapPartitions       reduce               show                   takeAsList        unionByName
+apply        columns                         distinct         flatMap            isLocal           na                  registerTempTable    sort                   toDF              unpersist
+as           count                           drop             foreach            isStreaming       orderBy             repartition          sortWithinPartitions   toJSON            where
+cache        createGlobalTempView            dropDuplicates   foreachPartition   javaRDD           persist             repartitionByRange   sparkSession           toJavaRDD         withColumn
+checkpoint   createOrReplaceGlobalTempView   dtypes           groupBy            join              printSchema         rollup               sqlContext             toLocalIterator   withColumnRenamed
+coalesce     createOrReplaceTempView         except           groupByKey         joinWith          queryExecution      sample               stat                   toString          withWatermark
+col          createTempView                  explain          head               limit             randomSplit         schema               storageLevel           transform         write
+colRegex     crossJoin                       explode          hint               localCheckpoint   randomSplitAsList   select               summary                union             writeStream
+
+scala> order_items.where
+   def where(conditionExpr: String): org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]   def where(condition: org.apache.spark.sql.Column): org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]
+
+scala> order_items.where($"order_item_order_id" === 5).agg(sum
+sum   sumDistinct
+
+scala> order_items.where($"order_item_order_id" === 5).agg(sum
+   def sum(columnName: String): org.apache.spark.sql.Column   def sum(e: org.apache.spark.sql.Column): org.apache.spark.sql.Column
+
+scala> order_items.where($"order_item_order_id" === 5).agg(sum($"order_item_subtotal"))
+res0: org.apache.spark.sql.DataFrame = [sum(order_item_subtotal): double]
+
+scala> order_items.where($"order_item_order_id" === 5).agg(sum($"order_item_subtotal")).show
++------------------------+
+|sum(order_item_subtotal)|
++------------------------+
+|      1129.8600000000001|
++------------------------+
+
+
+scala> order_items.where($"order_item_order_id" === 5).agg(sum($"order_item_subtotal").alias("TOTAL).show
+<console>:1: error: unclosed string literal
+order_items.where($"order_item_order_id" === 5).agg(sum($"order_item_subtotal").alias("TOTAL).show
+                                                                                      ^
+
+scala> order_items.where($"order_item_order_id" === 5).agg(sum($"order_item_subtotal").alias("TOTAL")).show
++------------------+
+|             TOTAL|
++------------------+
+|1129.8600000000001|
++------------------+
+
+
+scala> order_items.where($"order_item_order_id" === 5).agg(max($"order_item_subtotal").alias("MAX")).show
++------+
+|   MAX|
++------+
+|299.98|
++------+
+
+
+scala> order_items.where($"order_item_order_id" === 5).agg(min($"order_item_subtotal").alias("MIN")).show
++-----+
+|  MIN|
++-----+
+|99.96|
++-----+
+
+
+scala> order_items.where($"order_item_order_id" === 5).agg(avg($"order_item_subtotal").alias("AVERAGE")).show
++------------------+
+|           AVERAGE|
++------------------+
+|225.97200000000004|
++------------------+
+
+
+scala> order_items.groupBy
+groupBy   groupByKey
+
+scala> order_items.groupBy
+   def groupBy(col1: String,cols: String*): org.apache.spark.sql.RelationalGroupedDataset   def groupBy(cols: org.apache.spark.sql.Column*): org.apache.spark.sql.RelationalGroupedDataset
+
+scala> order_items.groupBy
+   def groupBy(col1: String,cols: String*): org.apache.spark.sql.RelationalGroupedDataset   def groupBy(cols: org.apache.spark.sql.Column*): org.apache.spark.sql.RelationalGroupedDataset
+
+scala> order_items.groupBy("order_status").
+agg   avg   count   max   mean   min   pivot   sum   toString
+
+
+scala> orders.groupBy("order_status").count
+res7: org.apache.spark.sql.DataFrame = [order_status: string, count: bigint]
+
+scala> orders.groupBy("order_status").count.show
++---------------+-----+
+|   order_status|count|
++---------------+-----+
+|PENDING_PAYMENT|15030|
+|       COMPLETE|22899|
+|        ON_HOLD| 3798|
+| PAYMENT_REVIEW|  729|
+|     PROCESSING| 8275|
+|         CLOSED| 7556|
+|SUSPECTED_FRAUD| 1558|
+|        PENDING| 7610|
+|       CANCELED| 1428|
++---------------+-----+
+
+
+scala> orders.printSchema
+root
+ |-- order_customer_id: long (nullable = true)
+ |-- order_date: string (nullable = true)
+ |-- order_id: long (nullable = true)
+ |-- order_status: string (nullable = true)
+
+
+scala> order_itmes.printSchema
+<console>:24: error: not found: value order_itmes
+       order_itmes.printSchema
+       ^
+
+scala> order_items.printSchema
+root
+ |-- order_item_id: long (nullable = true)
+ |-- order_item_order_id: long (nullable = true)
+ |-- order_item_product_id: long (nullable = true)
+ |-- order_item_product_price: double (nullable = true)
+ |-- order_item_quantity: long (nullable = true)
+ |-- order_item_subtotal: double (nullable = true)
+
+
+scala> order_items.groupBy($"order_item_order_id").sum
+   def sum(colNames: String*): org.apache.spark.sql.DataFrame
+
+scala> order_items.groupBy($"order_item_order_id").sum("order_item_product_price")
+res13: org.apache.spark.sql.DataFrame = [order_item_order_id: bigint, sum(order_item_product_price): double]
+
+scala> order_items.groupBy($"order_item_order_id").sum("order_item_product_price").show
++-------------------+-----------------------------+
+|order_item_order_id|sum(order_item_product_price)|
++-------------------+-----------------------------+
+|                 29|            909.9300000000001|
+|                474|           374.94000000000005|
+|                964|           499.95000000000005|
+|               1677|                       277.97|
+|               1806|                       509.97|
+|               1950|                       733.94|
+|               2214|                       149.99|
+|               2250|                       569.96|
+|               2453|                       749.95|
+|               2509|                       889.94|
+|               2529|                        59.99|
+|               2927|                       819.94|
+|               3091|           389.95000000000005|
+|               3764|                        47.99|
+|               4590|            649.9300000000001|
+|               4894|                       899.94|
+|               5385|                       309.96|
+|               5409|           459.96000000000004|
+|               6721|            89.99000000000001|
+|               7225|           434.94000000000005|
++-------------------+-----------------------------+
+only showing top 20 rows
+
+
+scala> order_items.groupBy($"order_item_order_id").sum("order_item_product_price").
+agg          collect                         cube             filter             inputFiles        map                 rdd                  selectExpr             take              unionAll
+alias        collectAsList                   describe         first              intersect         mapPartitions       reduce               show                   takeAsList        unionByName
+apply        columns                         distinct         flatMap            isLocal           na                  registerTempTable    sort                   toDF              unpersist
+as           count                           drop             foreach            isStreaming       orderBy             repartition          sortWithinPartitions   toJSON            where
+cache        createGlobalTempView            dropDuplicates   foreachPartition   javaRDD           persist             repartitionByRange   sparkSession           toJavaRDD         withColumn
+checkpoint   createOrReplaceGlobalTempView   dtypes           groupBy            join              printSchema         rollup               sqlContext             toLocalIterator   withColumnRenamed
+coalesce     createOrReplaceTempView         except           groupByKey         joinWith          queryExecution      sample               stat                   toString          withWatermark
+col          createTempView                  explain          head               limit             randomSplit         schema               storageLevel           transform         write
+colRegex     crossJoin                       explode          hint               localCheckpoint   randomSplitAsList   select               summary                union             writeStream
+
+scala> order_items.groupBy($"order_item_order_id").sum("order_item_product_price").alias("GROUP BY PRODCUT_PRICE").show
++-------------------+-----------------------------+
+|order_item_order_id|sum(order_item_product_price)|
++-------------------+-----------------------------+
+|                 29|            909.9300000000001|
+|                474|           374.94000000000005|
+|                964|           499.95000000000005|
+|               1677|                       277.97|
+|               1806|                       509.97|
+|               1950|                       733.94|
+|               2214|                       149.99|
+|               2250|                       569.96|
+|               2453|                       749.95|
+|               2509|                       889.94|
+|               2529|                        59.99|
+|               2927|                       819.94|
+|               3091|           389.95000000000005|
+|               3764|                        47.99|
+|               4590|            649.9300000000001|
+|               4894|                       899.94|
+|               5385|                       309.96|
+|               5409|           459.96000000000004|
+|               6721|            89.99000000000001|
+|               7225|           434.94000000000005|
++-------------------+-----------------------------+
+only showing top 20 rows
+
+
+scala> order_items.groupBy($"order_item_order_id").agg(sum("order_item_product_price")).alias("GROUP BY PRODCUT_PRICE").show
++-------------------+-----------------------------+
+|order_item_order_id|sum(order_item_product_price)|
++-------------------+-----------------------------+
+|                 29|            909.9300000000001|
+|                474|           374.94000000000005|
+|                964|           499.95000000000005|
+|               1677|                       277.97|
+|               1806|                       509.97|
+|               1950|                       733.94|
+|               2214|                       149.99|
+|               2250|                       569.96|
+|               2453|                       749.95|
+|               2509|                       889.94|
+|               2529|                        59.99|
+|               2927|                       819.94|
+|               3091|           389.95000000000005|
+|               3764|                        47.99|
+|               4590|            649.9300000000001|
+|               4894|                       899.94|
+|               5385|                       309.96|
+|               5409|           459.96000000000004|
+|               6721|            89.99000000000001|
+|               7225|           434.94000000000005|
++-------------------+-----------------------------+
+only showing top 20 rows
+
+
+scala> order_items.groupBy($"order_item_order_id").agg(sum("order_item_product_price").alias("GROUP BY PRODCUT_PRICE")).show
++-------------------+----------------------+
+|order_item_order_id|GROUP BY PRODCUT_PRICE|
++-------------------+----------------------+
+|                 29|     909.9300000000001|
+|                474|    374.94000000000005|
+|                964|    499.95000000000005|
+|               1677|                277.97|
+|               1806|                509.97|
+|               1950|                733.94|
+|               2214|                149.99|
+|               2250|                569.96|
+|               2453|                749.95|
+|               2509|                889.94|
+|               2529|                 59.99|
+|               2927|                819.94|
+|               3091|    389.95000000000005|
+|               3764|                 47.99|
+|               4590|     649.9300000000001|
+|               4894|                899.94|
+|               5385|                309.96|
+|               5409|    459.96000000000004|
+|               6721|     89.99000000000001|
+|               7225|    434.94000000000005|
++-------------------+----------------------+
+only showing top 20 rows
+
+
+scala> // Get dialy product revenue
+
+scala> val dailyProductRevenue = orders.where($"order_status" isin("COMPLETE", "CLOSED"))
+dailyProductRevenue: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [order_customer_id: bigint, order_date: string ... 2 more fields]
+
+
+scala> val dailyProductRevenue = orders.where($"order_status" isin("COMPLETE", "CLOSED")).join(order_items,$"order_id" === $"order_item_order_id").groupBy($"order_date",$"order_item_product_id").agg(sum("order_item_subtotal").alias("DAILY_PRDUCT_REVENUE"))
+dailyProductRevenue: org.apache.spark.sql.DataFrame = [order_date: string, order_item_product_id: bigint ... 1 more field]
+
+scala> dailyProductRevenue.count
+res18: Long = 9120
+
+scala> dailyProductRevenue.show
++--------------------+---------------------+--------------------+
+|          order_date|order_item_product_id|DAILY_PRDUCT_REVENUE|
++--------------------+---------------------+--------------------+
+|2013-07-30 00:00:...|                  822|              239.95|
+|2013-08-06 00:00:...|                  828|               31.99|
+|2013-08-12 00:00:...|                  703|               59.97|
+|2013-08-15 00:00:...|                  403|  3639.7199999999984|
+|2013-08-18 00:00:...|                  172|               120.0|
+|2013-08-24 00:00:...|                  567|                75.0|
+|2013-08-27 00:00:...|                  567|               125.0|
+|2013-09-27 00:00:...|                   44|              299.95|
+|2013-10-02 00:00:...|                 1004|  11599.419999999995|
+|2013-11-08 00:00:...|                  191|   4099.589999999999|
+|2013-11-29 00:00:...|                 1014|   4998.000000000001|
+|2013-12-14 00:00:...|                  823|              259.95|
+|2013-12-22 00:00:...|                  835|               95.97|
+|2013-12-30 00:00:...|                  572|              159.96|
+|2014-01-04 00:00:...|                   44|              299.95|
+|2014-01-11 00:00:...|                  906|              124.95|
+|2014-01-14 00:00:...|                  249|              439.76|
+|2014-01-26 00:00:...|                 1073|              1999.9|
+|2014-01-26 00:00:...|                  797|               53.97|
+|2014-01-28 00:00:...|                  703|               59.97|
++--------------------+---------------------+--------------------+
+only showing top 20 rows
+
+
+scala> dailyProductRevenue.orderBy
+
+def orderBy(sortExprs: org.apache.spark.sql.Column*): org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]
+def orderBy(sortCol: String,sortCols: String*): org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]
+
+
+scala> dailyProductRevenue.orderBy($"order_date",$"DAILY_PRDUCT_REVENUE" desc)
+warning: there was one feature warning; re-run with -feature for details
+res25: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [order_date: string, order_item_product_id: bigint ... 1 more field]
+
+scala> dailyProductRevenue.orderBy($"order_date",$"DAILY_PRDUCT_REVENUE" desc).show
+warning: there was one feature warning; re-run with -feature for details
++--------------------+---------------------+--------------------+
+|          order_date|order_item_product_id|DAILY_PRDUCT_REVENUE|
++--------------------+---------------------+--------------------+
+|2013-07-25 00:00:...|                 1004|   5599.719999999999|
+|2013-07-25 00:00:...|                  191|             5099.49|
+|2013-07-25 00:00:...|                  957|   4499.700000000001|
+|2013-07-25 00:00:...|                  365|  3359.4399999999996|
+|2013-07-25 00:00:...|                 1073|  2999.8500000000004|
+|2013-07-25 00:00:...|                 1014|             2798.88|
+|2013-07-25 00:00:...|                  403|  1949.8500000000001|
+|2013-07-25 00:00:...|                  502|              1650.0|
+|2013-07-25 00:00:...|                  627|             1079.73|
+|2013-07-25 00:00:...|                  226|              599.99|
+|2013-07-25 00:00:...|                   24|              319.96|
+|2013-07-25 00:00:...|                  821|              207.96|
+|2013-07-25 00:00:...|                  625|              199.99|
+|2013-07-25 00:00:...|                  705|              119.99|
+|2013-07-25 00:00:...|                  572|              119.97|
+|2013-07-25 00:00:...|                  666|              109.99|
+|2013-07-25 00:00:...|                  725|               108.0|
+|2013-07-25 00:00:...|                  134|               100.0|
+|2013-07-25 00:00:...|                  906|               99.96|
+|2013-07-25 00:00:...|                  828|               95.97|
++--------------------+---------------------+--------------------+
+only showing top 20 rows
+
+
+scala> dailyProductRevenue.orderBy($"order_date",$"DAILY_PRDUCT_REVENUE").show
++--------------------+---------------------+--------------------+
+|          order_date|order_item_product_id|DAILY_PRDUCT_REVENUE|
++--------------------+---------------------+--------------------+
+|2013-07-25 00:00:...|                  897|               49.98|
+|2013-07-25 00:00:...|                  835|               63.98|
+|2013-07-25 00:00:...|                   93|               74.97|
+|2013-07-25 00:00:...|                  924|               79.95|
+|2013-07-25 00:00:...|                  926|               79.95|
+|2013-07-25 00:00:...|                  810|               79.96|
+|2013-07-25 00:00:...|                  828|               95.97|
+|2013-07-25 00:00:...|                  906|               99.96|
+|2013-07-25 00:00:...|                  134|               100.0|
+|2013-07-25 00:00:...|                  725|               108.0|
+|2013-07-25 00:00:...|                  666|              109.99|
+|2013-07-25 00:00:...|                  572|              119.97|
+|2013-07-25 00:00:...|                  705|              119.99|
+|2013-07-25 00:00:...|                  625|              199.99|
+|2013-07-25 00:00:...|                  821|              207.96|
+|2013-07-25 00:00:...|                   24|              319.96|
+|2013-07-25 00:00:...|                  226|              599.99|
+|2013-07-25 00:00:...|                  627|             1079.73|
+|2013-07-25 00:00:...|                  502|              1650.0|
+|2013-07-25 00:00:...|                  403|  1949.8500000000001|
++--------------------+---------------------+--------------------+
+only showing top 20 rows

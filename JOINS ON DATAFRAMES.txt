@@ -1,0 +1,380 @@
+scala> val orders = spark.read.json("D:\\Hadoop\\DATASETS\\data-master\\retail_db_json\\orders")
+2019-02-10 19:28:49 WARN  ObjectStore:568 - Failed to get database global_temp, returning NoSuchObjectException
+orders: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 2 more fields]
+
+scala>
+
+scala> val order_items = spark.read.json("D:\\Hadoop\\DATASETS\\data-master\\retail_db_json\\order_items")
+order_items: org.apache.spark.sql.DataFrame = [order_item_id: bigint, order_item_order_id: bigint ... 4 more fields]
+
+scala> val ordersJoin = orders.join
+join   joinWith
+
+scala> val ordersJoin = orders.join
+
+def join(right: org.apache.spark.sql.Dataset[_],usingColumns: Seq[String]): org.apache.spark.sql.DataFrame
+def join(right: org.apache.spark.sql.Dataset[_],joinExprs: org.apache.spark.sql.Column,joinType: String): org.apache.spark.sql.DataFrame
+def join(right: org.apache.spark.sql.Dataset[_],usingColumn: String): org.apache.spark.sql.DataFrame
+def join(right: org.apache.spark.sql.Dataset[_],usingColumns: Seq[String],joinType: String): org.apache.spark.sql.DataFrame
+def join(right: org.apache.spark.sql.Dataset[_]): org.apache.spark.sql.DataFrame
+def join(right: org.apache.spark.sql.Dataset[_],joinExprs: org.apache.spark.sql.Column): org.apache.spark.sql.DataFrame
+
+
+
+scala> val ordersJoin = orders.join(order_items,$"order_id" === $"order_item_order_id")
+ordersJoin: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 8 more fields]
+
+scala> ordersJoin.show
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|order_customer_id|          order_date|order_id|   order_status|order_item_id|order_item_order_id|order_item_product_id|order_item_product_price|order_item_quantity|order_item_subtotal|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|            11599|2013-07-25 00:00:...|       1|         CLOSED|            1|                  1|                  957|                  299.98|                  1|             299.98|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|            2|                  2|                 1073|                  199.99|                  1|             199.99|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|            3|                  2|                  502|                    50.0|                  5|              250.0|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|            4|                  2|                  403|                  129.99|                  1|             129.99|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|            5|                  4|                  897|                   24.99|                  2|              49.98|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|            6|                  4|                  365|                   59.99|                  5|             299.95|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|            7|                  4|                  502|                    50.0|                  3|              150.0|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|            8|                  4|                 1014|                   49.98|                  4|             199.92|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|            9|                  5|                  957|                  299.98|                  1|             299.98|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|           10|                  5|                  365|                   59.99|                  5|             299.95|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|           11|                  5|                 1014|                   49.98|                  2|              99.96|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|           12|                  5|                  957|                  299.98|                  1|             299.98|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|           13|                  5|                  403|                  129.99|                  1|             129.99|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|           14|                  7|                 1073|                  199.99|                  1|             199.99|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|           15|                  7|                  957|                  299.98|                  1|             299.98|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|           16|                  7|                  926|                   15.99|                  5|              79.95|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|           17|                  8|                  365|                   59.99|                  3|             179.97|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|           18|                  8|                  365|                   59.99|                  5|             299.95|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|           19|                  8|                 1014|                   49.98|                  4|             199.92|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|           20|                  8|                  502|                    50.0|                  1|               50.0|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+only showing top 20 rows
+
+
+scala> ordersJoin.count
+res1: Long = 172198
+
+
+scala> ordersJoin.count
+res1: Long = 172198
+
+scala> ordersJoin.select(orders("order_id")).show
++--------+
+|order_id|
++--------+
+|       1|
+|       2|
+|       2|
+|       2|
+|       4|
+|       4|
+|       4|
+|       4|
+|       5|
+|       5|
+|       5|
+|       5|
+|       5|
+|       7|
+|       7|
+|       7|
+|       8|
+|       8|
+|       8|
+|       8|
++--------+
+only showing top 20 rows
+
+
+scala> ordersJoin.select(orders("order_id")).
+agg          collect                         cube             filter             inputFiles        map                 rdd                  selectExpr             take              unionAll
+alias        collectAsList                   describe         first              intersect         mapPartitions       reduce               show                   takeAsList        unionByName
+apply        columns                         distinct         flatMap            isLocal           na                  registerTempTable    sort                   toDF              unpersist
+as           count                           drop             foreach            isStreaming       orderBy             repartition          sortWithinPartitions   toJSON            where
+cache        createGlobalTempView            dropDuplicates   foreachPartition   javaRDD           persist             repartitionByRange   sparkSession           toJavaRDD         withColumn
+checkpoint   createOrReplaceGlobalTempView   dtypes           groupBy            join              printSchema         rollup               sqlContext             toLocalIterator   withColumnRenamed
+coalesce     createOrReplaceTempView         except           groupByKey         joinWith          queryExecution      sample               stat                   toString          withWatermark
+col          createTempView                  explain          head               limit             randomSplit         schema               storageLevel           transform         write
+colRegex     crossJoin                       explode          hint               localCheckpoint   randomSplitAsList   select               summary                union             writeStream
+
+scala> ordersJoin.select(orders("order_id")).distinct.count
+res3: Long = 57431
+
+scala> ordersJoin.select(order_items("order_item_order_id")).distinct.count
+res4: Long = 57431
+
+scala> ordersJoin.select(orders("order_id")).count
+res5: Long = 172198
+
+
+scala> ordersJoin.select(order_items("order_item_order_id")).distinct.count
+res7: Long = 57431
+
+scala> ordersJoin.select(order_items("order_item_order_id")).count
+res8: Long = 172198
+
+scala> orders.select(order_id).count
+<console>:26: error: not found: value order_id
+       orders.select(order_id).count
+                     ^
+
+scala> orders.printSchema
+root
+ |-- order_customer_id: long (nullable = true)
+ |-- order_date: string (nullable = true)
+ |-- order_id: long (nullable = true)
+ |-- order_status: string (nullable = true)
+
+
+scala> orders.select($"order_id").count
+res11: Long = 68883
+
+scala> orders.select($"order_id").distinct.count
+res12: Long = 68883
+
+scala> orders.select("order_id").distinct.count
+res13: Long = 68883
+
+
+scala> val ordersOuterJoin = orders.join(order_items, $"order_id" === $"order_item_order_id", "left")
+ordersOuterJoin: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 8 more fields]
+
+scala> ordersOuterJoin.count
+res16: Long = 183650
+
+scala> ordersOuterJoin.show
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|order_customer_id|          order_date|order_id|   order_status|order_item_id|order_item_order_id|order_item_product_id|order_item_product_price|order_item_quantity|order_item_subtotal|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|             7562|2013-07-25 00:00:...|      26|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           83|                 29|                 1073|                  199.99|                  1|             199.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           84|                 29|                 1014|                   49.98|                  5|              249.9|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           85|                 29|                  403|                  129.99|                  1|             129.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           86|                 29|                  403|                  129.99|                  1|             129.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           87|                 29|                 1004|                  399.98|                  1|             399.98|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1161|                474|                 1014|                   49.98|                  4|             199.92|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1162|                474|                  502|                    50.0|                  3|              150.0|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1163|                474|                 1073|                  199.99|                  1|             199.99|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1164|                474|                  905|                   24.99|                  1|              24.99|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1165|                474|                 1014|                   49.98|                  4|             199.92|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2395|                964|                  627|                   39.99|                  4|             159.96|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2396|                964|                  957|                  299.98|                  1|             299.98|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2397|                964|                  977|                   29.99|                  5|             149.95|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2398|                964|                  403|                  129.99|                  1|             129.99|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4170|               1677|                  502|                    50.0|                  5|              250.0|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4171|               1677|                  191|                   99.99|                  2|             199.98|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4172|               1677|                  365|                   59.99|                  1|              59.99|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4173|               1677|                  797|                   17.99|                  5|              89.95|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4174|               1677|                  502|                    50.0|                  1|               50.0|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+only showing top 20 rows
+
+
+scala> ordersOuterJoin.select(isnull(order_items("order_item_id")))
+res21: org.apache.spark.sql.DataFrame = [(order_item_id IS NULL): boolean]
+
+scala> ordersOuterJoin.select(isnull(order_items("order_item_id"))).show
++-----------------------+
+|(order_item_id IS NULL)|
++-----------------------+
+|                   true|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
++-----------------------+
+only showing top 20 rows
+
+
+scala> ordersOuterJoin.select(order_items("order_item_id").isNull)
+res23: org.apache.spark.sql.DataFrame = [(order_item_id IS NULL): boolean]
+
+scala> ordersOuterJoin.select(order_items("order_item_id").isNull).show
++-----------------------+
+|(order_item_id IS NULL)|
++-----------------------+
+|                   true|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
+|                  false|
++-----------------------+
+only showing top 20 rows
+
+
+scala> ordersOuterJoin.where(order_items("order_item_id").isNull).show
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|order_customer_id|          order_date|order_id|   order_status|order_item_id|order_item_order_id|order_item_product_id|order_item_product_price|order_item_quantity|order_item_subtotal|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|             7562|2013-07-25 00:00:...|      26|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             7089|2013-08-02 00:00:...|    1697|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|              844|2013-08-05 00:00:...|    2040|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             2564|2013-08-14 00:00:...|    3506|PENDING_PAYMENT|         null|               null|                 null|                    null|               null|               null|
+|            11700|2013-08-23 00:00:...|    4823|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             2577|2013-08-27 00:00:...|    5556|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             7050|2013-09-22 00:00:...|    9458|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             4335|2013-09-25 00:00:...|    9968|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             3100|2013-09-25 00:00:...|    9978|       CANCELED|         null|               null|                 null|                    null|               null|               null|
+|             7012|2013-10-04 00:00:...|   11567|PENDING_PAYMENT|         null|               null|                 null|                    null|               null|               null|
+|             5963|2013-10-06 00:00:...|   11938|        ON_HOLD|         null|               null|                 null|                    null|               null|               null|
+|             5403|2013-10-29 00:00:...|   15173|        ON_HOLD|         null|               null|                 null|                    null|               null|               null|
+|             2646|2013-10-31 00:00:...|   15371|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             8250|2013-11-14 00:00:...|   18147|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             8319|2013-11-14 00:00:...|   18196|     PROCESSING|         null|               null|                 null|                    null|               null|               null|
+|            12230|2013-11-17 00:00:...|   18628|PENDING_PAYMENT|         null|               null|                 null|                    null|               null|               null|
+|             3212|2013-11-21 00:00:...|   19158|     PROCESSING|         null|               null|                 null|                    null|               null|               null|
+|             3772|2013-11-21 00:00:...|   19163|PENDING_PAYMENT|         null|               null|                 null|                    null|               null|               null|
+|             4864|2013-12-06 00:00:...|   21965|         CLOSED|         null|               null|                 null|                    null|               null|               null|
+|            11486|2013-12-07 00:00:...|   22165|        PENDING|         null|               null|                 null|                    null|               null|               null|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+only showing top 20 rows
+
+
+scala> ordersOuterJoin.where(isnull(order_items("order_item_id"))).show
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|order_customer_id|          order_date|order_id|   order_status|order_item_id|order_item_order_id|order_item_product_id|order_item_product_price|order_item_quantity|order_item_subtotal|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|             7562|2013-07-25 00:00:...|      26|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             7089|2013-08-02 00:00:...|    1697|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|              844|2013-08-05 00:00:...|    2040|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             2564|2013-08-14 00:00:...|    3506|PENDING_PAYMENT|         null|               null|                 null|                    null|               null|               null|
+|            11700|2013-08-23 00:00:...|    4823|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             2577|2013-08-27 00:00:...|    5556|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             7050|2013-09-22 00:00:...|    9458|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             4335|2013-09-25 00:00:...|    9968|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             3100|2013-09-25 00:00:...|    9978|       CANCELED|         null|               null|                 null|                    null|               null|               null|
+|             7012|2013-10-04 00:00:...|   11567|PENDING_PAYMENT|         null|               null|                 null|                    null|               null|               null|
+|             5963|2013-10-06 00:00:...|   11938|        ON_HOLD|         null|               null|                 null|                    null|               null|               null|
+|             5403|2013-10-29 00:00:...|   15173|        ON_HOLD|         null|               null|                 null|                    null|               null|               null|
+|             2646|2013-10-31 00:00:...|   15371|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             8250|2013-11-14 00:00:...|   18147|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|             8319|2013-11-14 00:00:...|   18196|     PROCESSING|         null|               null|                 null|                    null|               null|               null|
+|            12230|2013-11-17 00:00:...|   18628|PENDING_PAYMENT|         null|               null|                 null|                    null|               null|               null|
+|             3212|2013-11-21 00:00:...|   19158|     PROCESSING|         null|               null|                 null|                    null|               null|               null|
+|             3772|2013-11-21 00:00:...|   19163|PENDING_PAYMENT|         null|               null|                 null|                    null|               null|               null|
+|             4864|2013-12-06 00:00:...|   21965|         CLOSED|         null|               null|                 null|                    null|               null|               null|
+|            11486|2013-12-07 00:00:...|   22165|        PENDING|         null|               null|                 null|                    null|               null|               null|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+only showing top 20 rows
+
+scala> val ordersOuterJoin = orders.join(order_items, $"order_id" === $"order_item_order_id", "full")
+ordersOuterJoin: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 8 more fields]
+
+scala> ordersOuterJoin.show
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|order_customer_id|          order_date|order_id|   order_status|order_item_id|order_item_order_id|order_item_product_id|order_item_product_price|order_item_quantity|order_item_subtotal|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|             7562|2013-07-25 00:00:...|      26|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           83|                 29|                 1073|                  199.99|                  1|             199.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           84|                 29|                 1014|                   49.98|                  5|              249.9|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           85|                 29|                  403|                  129.99|                  1|             129.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           86|                 29|                  403|                  129.99|                  1|             129.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           87|                 29|                 1004|                  399.98|                  1|             399.98|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1161|                474|                 1014|                   49.98|                  4|             199.92|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1162|                474|                  502|                    50.0|                  3|              150.0|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1163|                474|                 1073|                  199.99|                  1|             199.99|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1164|                474|                  905|                   24.99|                  1|              24.99|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1165|                474|                 1014|                   49.98|                  4|             199.92|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2395|                964|                  627|                   39.99|                  4|             159.96|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2396|                964|                  957|                  299.98|                  1|             299.98|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2397|                964|                  977|                   29.99|                  5|             149.95|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2398|                964|                  403|                  129.99|                  1|             129.99|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4170|               1677|                  502|                    50.0|                  5|              250.0|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4171|               1677|                  191|                   99.99|                  2|             199.98|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4172|               1677|                  365|                   59.99|                  1|              59.99|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4173|               1677|                  797|                   17.99|                  5|              89.95|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4174|               1677|                  502|                    50.0|                  1|               50.0|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+only showing top 20 rows
+
+
+scala> val ordersLeftOuterJoin = orders.join(order_items, $"order_id" === $"order_item_order_id", "left")
+ordersLeftOuterJoin: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 8 more fields]
+
+scala> ordersLeftOuterJoin.show
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|order_customer_id|          order_date|order_id|   order_status|order_item_id|order_item_order_id|order_item_product_id|order_item_product_price|order_item_quantity|order_item_subtotal|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|             7562|2013-07-25 00:00:...|      26|       COMPLETE|         null|               null|                 null|                    null|               null|               null|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           83|                 29|                 1073|                  199.99|                  1|             199.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           84|                 29|                 1014|                   49.98|                  5|              249.9|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           85|                 29|                  403|                  129.99|                  1|             129.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           86|                 29|                  403|                  129.99|                  1|             129.99|
+|              196|2013-07-25 00:00:...|      29|     PROCESSING|           87|                 29|                 1004|                  399.98|                  1|             399.98|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1161|                474|                 1014|                   49.98|                  4|             199.92|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1162|                474|                  502|                    50.0|                  3|              150.0|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1163|                474|                 1073|                  199.99|                  1|             199.99|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1164|                474|                  905|                   24.99|                  1|              24.99|
+|             8349|2013-07-27 00:00:...|     474|PENDING_PAYMENT|         1165|                474|                 1014|                   49.98|                  4|             199.92|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2395|                964|                  627|                   39.99|                  4|             159.96|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2396|                964|                  957|                  299.98|                  1|             299.98|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2397|                964|                  977|                   29.99|                  5|             149.95|
+|             3397|2013-07-30 00:00:...|     964|       COMPLETE|         2398|                964|                  403|                  129.99|                  1|             129.99|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4170|               1677|                  502|                    50.0|                  5|              250.0|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4171|               1677|                  191|                   99.99|                  2|             199.98|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4172|               1677|                  365|                   59.99|                  1|              59.99|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4173|               1677|                  797|                   17.99|                  5|              89.95|
+|            11037|2013-08-02 00:00:...|    1677|       COMPLETE|         4174|               1677|                  502|                    50.0|                  1|               50.0|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+only showing top 20 rows
+
+scala> val ordersRightOuterJoin = orders.join(order_items, $"order_id" === $"order_item_order_id", "right")
+ordersRightOuterJoin: org.apache.spark.sql.DataFrame = [order_customer_id: bigint, order_date: string ... 8 more fields]
+
+scala> ordersRightOuterJoin.show
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|order_customer_id|          order_date|order_id|   order_status|order_item_id|order_item_order_id|order_item_product_id|order_item_product_price|order_item_quantity|order_item_subtotal|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+|            11599|2013-07-25 00:00:...|       1|         CLOSED|            1|                  1|                  957|                  299.98|                  1|             299.98|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|            2|                  2|                 1073|                  199.99|                  1|             199.99|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|            3|                  2|                  502|                    50.0|                  5|              250.0|
+|              256|2013-07-25 00:00:...|       2|PENDING_PAYMENT|            4|                  2|                  403|                  129.99|                  1|             129.99|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|            5|                  4|                  897|                   24.99|                  2|              49.98|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|            6|                  4|                  365|                   59.99|                  5|             299.95|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|            7|                  4|                  502|                    50.0|                  3|              150.0|
+|             8827|2013-07-25 00:00:...|       4|         CLOSED|            8|                  4|                 1014|                   49.98|                  4|             199.92|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|            9|                  5|                  957|                  299.98|                  1|             299.98|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|           10|                  5|                  365|                   59.99|                  5|             299.95|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|           11|                  5|                 1014|                   49.98|                  2|              99.96|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|           12|                  5|                  957|                  299.98|                  1|             299.98|
+|            11318|2013-07-25 00:00:...|       5|       COMPLETE|           13|                  5|                  403|                  129.99|                  1|             129.99|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|           14|                  7|                 1073|                  199.99|                  1|             199.99|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|           15|                  7|                  957|                  299.98|                  1|             299.98|
+|             4530|2013-07-25 00:00:...|       7|       COMPLETE|           16|                  7|                  926|                   15.99|                  5|              79.95|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|           17|                  8|                  365|                   59.99|                  3|             179.97|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|           18|                  8|                  365|                   59.99|                  5|             299.95|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|           19|                  8|                 1014|                   49.98|                  4|             199.92|
+|             2911|2013-07-25 00:00:...|       8|     PROCESSING|           20|                  8|                  502|                    50.0|                  1|               50.0|
++-----------------+--------------------+--------+---------------+-------------+-------------------+---------------------+------------------------+-------------------+-------------------+
+only showing top 20 rows

@@ -1,0 +1,13 @@
+CACHE VS BROADCAST VARIABLES:
+----------------------------
+RDDs are divided into partitions. These partitions themselves act as an immutable subset of the entire RDD. When Spark executes each stage of the graph, 
+each partition gets sent to a worker which operates on the subset of the data. In turn, each worker can cache the data if the RDD needs to be re-iterated.
+
+Broadcast variables are used to send some immutable state once to each worker. You use them when you want a local copy of a variable.
+
+These two operations are quite different from each other, and each one represents a solution to a different problem.
+
+TYPES OF ACCUMLATORS:
+--------------------
+Named Accumlators: They will display their running results on Spark UI.
+Unnamed Accumlators : They will not display their results on Spark UI.

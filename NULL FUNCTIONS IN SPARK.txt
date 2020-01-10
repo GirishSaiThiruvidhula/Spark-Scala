@@ -1,0 +1,53 @@
+NULL VALUE FUNCTIONS   
+==========================
+
+
+scala> dual.select(isnull
+   def isnull(e: org.apache.spark.sql.Column): org.apache.spark.sql.Column
+
+scala> dual.select(isnull(lit(null)).alias("TO FIND COLUMN IS NULL OR NOT")).show
++-----------------------------+
+|TO FIND COLUMN IS NULL OR NOT|
++-----------------------------+
+|                         true|
++-----------------------------+
+
+
+scala> dual.select(isnull(lit(GIRISH)).alias("TO FIND COLUMN IS NULL OR NOT")).show
+<console>:26: error: not found: value GIRISH
+       dual.select(isnull(lit(GIRISH)).alias("TO FIND COLUMN IS NULL OR NOT")).show
+                              ^
+
+scala> dual.select(isnull(lit(1)).alias("TO FIND COLUMN IS NULL OR NOT")).show
++-----------------------------+
+|TO FIND COLUMN IS NULL OR NOT|
++-----------------------------+
+|                        false|
++-----------------------------+
+
+scala> orders.select(isnull($"order_status")).show
++----------------------+
+|(order_status IS NULL)|
++----------------------+
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
+|                 false|
++----------------------+
+only showing top 20 rows
